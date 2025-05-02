@@ -16,6 +16,7 @@ typedef struct {
   unsigned char fan;
   unsigned char cooling;
   unsigned char drum;
+  String pidCommand = "";
 } StateRequestT;
 
 typedef struct {

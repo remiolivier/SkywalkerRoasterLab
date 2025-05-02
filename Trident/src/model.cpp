@@ -68,7 +68,9 @@ StateRequestT parseCommandToStateRequest(String input) {
     request.fan = 0;
     request.cooling = 0;
     request.drum = 0;
-  }
+  } else if (command == "PID") {
+		request.pidCommand = String(input);
+	}
 
   return request;
 }

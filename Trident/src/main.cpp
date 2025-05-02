@@ -73,7 +73,7 @@ void setup() {
   xTaskCreate(webSerialLoop, "WebSerialTask", configMINIMAL_STACK_SIZE + 2048,
               NULL, 1, NULL);
   displayInit();
-  initBLE("Trident", "1.0.0", "Skywalker-Trident");
+  initBLE("Trident", "1.0.1", "Skywalker-Trident");
   delay(5000);
 
   pinMode(TX_PIN, OUTPUT);
@@ -132,10 +132,12 @@ void webSerialLoop(void *params) {
                      String("Wifi: ") + WiFi.localIP().toString();
     displayMessage(readMsg.c_str());
     WebSerial.loop();
-    delay(500);
+    delay(250);
     ledControl();
+#ifdef S3
 		serialLoop();
-    webSocketLoop();
+#endif
+		webSocketLoop();
     bleLoop();
   }
   vTaskDelete(NULL);
@@ -155,7 +157,7 @@ void loop() {
 
   sendRoasterMessage();
   // Ensure PID or manual heat control is handled
-  // handlePIDControl();
+  handlePIDControl();
 
   processStateQueue();
   _currentState = getCurrentState();

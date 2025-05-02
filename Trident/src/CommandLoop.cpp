@@ -1,10 +1,9 @@
+#include <ArduinoJson.h>
+
 #include "CommandLoop.h"
 #include "dlog.h"
 #include "model.h"
-#include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
-#include <cmath>
-#include <cstring>
 
 AsyncWebSocket ws("/ws");
 
@@ -46,8 +45,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
     D_printf("msg: %s\n", msg.c_str());
 #endif
 
-    const size_t capacity = JSON_OBJECT_SIZE(3) + 60; // Memory pool
-    DynamicJsonDocument doc(capacity);
+    JsonDocument doc;
 
     // DEBUG WEBSOCKET
     // D_printf("[%u] get Text: %s\n", num, payload);
@@ -82,23 +80,20 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
     }
 
     // Send Values to Artisan over Websocket
+    JsonDocument root;
+    root["id"] = ln_id;
     const char *command = doc["command"].as<const char *>();
     if (command != NULL && strncmp(command, "getData", 7) == 0) {
-      JsonObject root = doc.to<JsonObject>();
-      JsonObject data = root.createNestedObject("data");
-      root["id"] = ln_id;
-      // float etbt[3];
-      // getETBTReadings(etbt);
-      data["ET"] = state.temp;            // Med_ExhaustTemp.getMedian()
-      data["BT"] = state.temp;            // Med_BeanTemp.getMedian();
-      data["BurnerVal"] = state.request.heater; 
-      data["FanVal"] = state.request.fan;
-      data["Drum"] = state.request.drum;
-      data["Cool"] = state.request.cooling;
+      root["data"]["ET"] = state.temp; // Med_ExhaustTemp.getMedian()
+      root["data"]["BT"] = state.temp; // Med_BeanTemp.getMedian();
+      root["data"]["BurnerVal"] = state.request.heater;
+      root["data"]["FanVal"] = state.request.fan;
+      root["data"]["Drum"] = state.request.drum;
+      root["data"]["Cool"] = state.request.cooling;
     }
 
-    char buffer[200];                        // create temp buffer
-    size_t len = serializeJson(doc, buffer); // serialize to buffer
+    char buffer[200];                         // create temp buffer
+    size_t len = serializeJson(root, buffer); // serialize to buffer
     // DEBUG WEBSOCKET
 
     client->text(buffer);
@@ -123,7 +118,7 @@ void setupMainLoop(AsyncWebServer *server) {
 StateRequestT socketTick(StateDataT data) {
   state = data;
   ws.cleanupClients();
-	StateRequestT response = request;
-	request = {255, 255, 255, 255};
-	return response;
+  StateRequestT response = request;
+  request = {255, 255, 255, 255};
+  return response;
 }

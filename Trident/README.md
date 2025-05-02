@@ -32,3 +32,11 @@ point, so that you can change the wifi data again.
 # Simultaneous operation
 While not entirely sensible, simultaneous operation is theoretically possible with Trident. You could for example
 observe and control the roast, both from HiBean and Artisan at the same time.
+
+
+# TODO list:
+
+- PID control
+- LED status signalling
+- code cleanup and potential improvements
+
