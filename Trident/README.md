@@ -36,7 +36,7 @@ observe and control the roast, both from HiBean and Artisan at the same time.
 
 # TODO list:
 
-- PID control
+- PID control ✅
 - LED status signalling
 - code cleanup and potential improvements
 
