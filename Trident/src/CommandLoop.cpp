@@ -3,6 +3,7 @@
 #include "CommandLoop.h"
 #include "dlog.h"
 #include "model.h"
+#include "state_request_queue.h"
 #include <ESPAsyncWebServer.h>
 
 AsyncWebSocket ws("/ws");
@@ -102,6 +103,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
     // send data to all connected clients
     // webSocket.broadcastTXT("message here");
+    enqueueStateRequest(request, SOURCE_WEBSOCKET);
   } break;
   default: // send message to client
     D_printf("unhandled message type: %d\n", type);

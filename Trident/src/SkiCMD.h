@@ -66,12 +66,11 @@ void handleCHAN() {
 }
 
 void handleOT1(uint8_t value) {
-  if (myPID.GetMode() == MANUAL) {
-    manualHeatLevel = constrain(value, 0, 100); // Set manual heat level
-    handleHEAT(manualHeatLevel);                // Apply the new setting
-  } else if (myPID.GetMode() == AUTOMATIC) {
+  manualHeatLevel = constrain(value, 0, 100); // Set manual heat level
+  if (myPID.GetMode() == AUTOMATIC) {
     setPIDMode(false); // Disable PID control
   }
+  handleHEAT(manualHeatLevel);
 }
 
 void handleREAD() {

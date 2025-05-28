@@ -15,6 +15,7 @@
 #include "ble.h"
 #include "dlog.h"
 #include "model.h"
+#include "state_request_queue.h"
 #include <Arduino.h>
 #include <BLE2902.h>
 #include <BLEDevice.h>
@@ -43,9 +44,9 @@ StateDataT _currentData = {0};
 StateRequestT bleTick(StateDataT data) {
   _currentData = data;
 
-	StateRequestT response = _currentRequest;
+  StateRequestT response = _currentRequest;
   _currentRequest = {255, 255, 255, 255};
-	return response;
+  return response;
 }
 
 void notifyBLEClient(const String &message);
@@ -99,6 +100,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
         notifyBLEClient(message);
       }
       _currentRequest = parseCommandToStateRequest(input);
+      enqueueStateRequest(_currentRequest, SOURCE_BLE);
     }
   }
 };

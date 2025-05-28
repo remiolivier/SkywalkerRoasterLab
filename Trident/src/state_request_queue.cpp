@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <cstdint>
 
-#define STATE_QUEUE_SIZE 3
+#define STATE_QUEUE_SIZE 5
 
 extern void handleDRUM(uint8_t value);
 extern void handleCOOL(uint8_t value);
@@ -31,7 +31,7 @@ void initStateQueue() {
 bool enqueueStateRequest(StateRequestT req, StateSourceT source) {
   if (req.cooling == 255 && req.heater == 255 && req.drum == 255 &&
       req.fan == 255 && req.pidCommand.isEmpty()) {
-    D_println("nothing to enqueue");
+    // D_println("nothing to enqueue");
     return false;
   }
   if (xSemaphoreTake(stateQueueMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
