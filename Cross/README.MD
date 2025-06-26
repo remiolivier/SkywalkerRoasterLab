@@ -51,4 +51,4 @@ Both Artisan and HiBean can be run independently or simultaneously.
 
 WiFi connectivity is only available in firmware builds that support it (e.g., Cross_Skywalker_v1.1.bin).
 
-Let me know if you'd like a version with specific Markdown styling (e.g., code blocks, icons, collapsible sections).
+
