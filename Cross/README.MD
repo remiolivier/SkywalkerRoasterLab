@@ -1,5 +1,54 @@
-Cross_Skywalker_v1.1.bin for wroom. Dual temperature, Artisan (USB, BT, WiFi), HiBean (Ble) 
-Max6675, SCK_18, CS_5 ,SO_19
-TX_16, RX_17
-How to use the WiFi of the above two firmwares: After the development board is powered on, search and connect to ESP32_Roaster on your mobile phone (mobile data must be turned off) or computer WiFi. Open the browser and enter 192.168.4.1, enter the page and enter the SSID (5G is not supported) and password, the development board will automatically save and restart, and then automatically connect to your specified WiFi (only need to enter once).
-Artisan can be connected via Bluetooth or USB (Only for Cross_Skywalker_v1.1.bin) ，If you want to connect via WiFi, you need to use the included Artisan(wifi).aset to open it, or refer to the included WebSocket settings to apply to your own Artisan settings. Both firmwares can run Artisan or HiBean separately or simultaneously. 
+Cross_Skywalker v1.1 Firmware (WROOM Edition)
+Features:
+
+Dual temperature input support
+
+Compatible with Artisan via USB, Bluetooth, and WiFi
+
+Compatible with HiBean via BLE (Bluetooth Low Energy)
+
+Sensor Pin Configuration:
+
+MAX6675 Thermocouple Module
+
+SCK → GPIO 18
+
+CS → GPIO 5
+
+SO → GPIO 19
+
+Serial Communication:
+
+TX → GPIO 16
+
+RX → GPIO 17
+
+WiFi Setup Instructions
+Power on the ESP32 development board.
+
+On your mobile phone or computer (ensure mobile data is disabled), search for and connect to the WiFi network named:
+ESP32_Roaster
+
+Open a browser and go to:
+http://192.168.4.1
+
+Enter your WiFi SSID (note: 5GHz networks are not supported) and password.
+
+The board will save the credentials, reboot, and automatically connect to your specified network (one-time setup only).
+
+Using with Artisan
+For Bluetooth or USB connections:
+Simply select the appropriate COM port or Bluetooth device in Artisan.
+
+For WiFi connections:
+
+Use the included Artisan(wifi).aset configuration file to connect.
+
+Alternatively, refer to the provided WebSocket settings and apply them to your own Artisan configuration.
+
+Notes
+Both Artisan and HiBean can be run independently or simultaneously.
+
+WiFi connectivity is only available in firmware builds that support it (e.g., Cross_Skywalker_v1.1.bin).
+
+Let me know if you'd like a version with specific Markdown styling (e.g., code blocks, icons, collapsible sections).
