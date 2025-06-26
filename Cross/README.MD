@@ -1,54 +1,88 @@
-Cross_Skywalker v1.1 Firmware (WROOM Edition)
-Features:
+# Cross_Skywalker v1.1 Firmware (ESP32 WROOM Edition)
 
-Dual temperature input support
+Firmware: `Cross_Skywalker_v1.1.bin`  
+👨‍💻 **Created by: Bear**
 
-Compatible with Artisan via USB, Bluetooth, and WiFi
+---
 
-Compatible with HiBean via BLE (Bluetooth Low Energy)
+## ✅ Features
 
-Sensor Pin Configuration:
+- Dual temperature input support
+- Supports **Artisan** via:
+  - USB
+  - Bluetooth
+  - WiFi
+- Supports **HiBean** via:
+  - BLE (Bluetooth Low Energy)
+- Artisan & HiBean can run **independently or simultaneously**
 
-MAX6675 Thermocouple Module
+---
 
-SCK → GPIO 18
+## 📌 Pin Configuration
 
-CS → GPIO 5
+### Thermocouple (MAX6675)
 
-SO → GPIO 19
+| Signal | GPIO |
+|--------|------|
+| SCK    | 18   |
+| CS     | 5    |
+| SO     | 19   |
 
-Serial Communication:
+### Serial Communication
 
-TX → GPIO 16
+| Label | GPIO |
+|-------|------|
+| TX    | 16   |
+| RX    | 17   |
 
-RX → GPIO 17
+---
 
-WiFi Setup Instructions
-Power on the ESP32 development board.
+## 📶 WiFi Setup Instructions
 
-On your mobile phone or computer (ensure mobile data is disabled), search for and connect to the WiFi network named:
-ESP32_Roaster
+1. Power on your ESP32 development board.
+2. On your mobile device or computer:
+   - Turn **off** mobile data (important).
+   - Connect to the WiFi network:  
+     **`ESP32_Roaster`**
+3. Open your browser and go to:  
+   **`http://192.168.4.1`**
+4. Enter your home WiFi:
+   - **SSID** (⚠️ 5GHz not supported)
+   - **Password**
+5. The device will save the credentials, reboot, and auto-connect to your network.
 
-Open a browser and go to:
-http://192.168.4.1
+> 🔁 This setup is only required once.
 
-Enter your WiFi SSID (note: 5GHz networks are not supported) and password.
+---
 
-The board will save the credentials, reboot, and automatically connect to your specified network (one-time setup only).
+## 🔧 Using with Artisan
 
-Using with Artisan
-For Bluetooth or USB connections:
-Simply select the appropriate COM port or Bluetooth device in Artisan.
+### USB or Bluetooth (For `Cross_Skywalker_v1.1.bin` Only)
 
-For WiFi connections:
+- Select the corresponding COM port or Bluetooth device in Artisan.
 
-Use the included Artisan(wifi).aset configuration file to connect.
+### WiFi (WebSocket)
 
-Alternatively, refer to the provided WebSocket settings and apply them to your own Artisan configuration.
+- Use the included config file:  
+  **`Artisan(wifi).aset`**
+- Or manually configure WebSocket settings based on the included documentation.
 
-Notes
-Both Artisan and HiBean can be run independently or simultaneously.
+---
 
-WiFi connectivity is only available in firmware builds that support it (e.g., Cross_Skywalker_v1.1.bin).
+## 📁 Included Files
 
+- `Cross_Skywalker_v1.1.bin`
+- `Artisan(wifi).aset`
+- WebSocket connection guide (optional)
 
+---
+
+## 🧠 Notes
+
+- Only one-time WiFi setup is needed unless credentials change.
+- Artisan and HiBean can be used at the same time without conflict.
+- Make sure to use 2.4GHz WiFi only.
+
+---
+
+© 2025 by **Bear**
