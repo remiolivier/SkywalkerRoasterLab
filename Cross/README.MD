@@ -1,6 +1,6 @@
-# Cross_Skywalker v1.1 Firmware (ESP32 WROOM Edition)
+# Cross_Skywalker v1.6.2 Firmware (ESP32 WROOM Edition)
 
-Firmware: `Cross_Skywalker_v1.1.bin`  
+Firmware: `Cross_Skywalker_v1.6.2.bin`  
 👨‍💻 **Created by: Bear**
 
 ---
