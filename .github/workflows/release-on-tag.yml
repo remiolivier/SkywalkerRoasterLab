@@ -1,13 +1,8 @@
-name: Build (PlatformIO) & Release
+name: Release on tag
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'Cubean/default/**'
-  pull_request:
-    paths:
-      - 'Cubean/default/**'
+    tags: ['v*']
   workflow_dispatch:
 
 jobs:
@@ -25,13 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Cache PlatformIO
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.platformio
@@ -39,8 +32,7 @@ jobs:
           key: pio-${{ runner.os }}-${{ hashFiles('Cubean/default/platformio.ini') }}
           restore-keys: pio-${{ runner.os }}-
 
-      - name: Install PlatformIO
-        run: pip install -U platformio
+      - run: pip install -U platformio
 
       - name: Build (${{ matrix.env }})
         run: pio run -e ${{ matrix.env }}
@@ -53,11 +45,26 @@ jobs:
                    ".pio/build/${{ matrix.env }}"/*.hex; do
             [ -f "$f" ] && cp -v "$f" "dist/cubean-${{ matrix.env }}-$(basename "$f")"
           done
-          ls -l dist || true
 
-      - name: Upload artifact (${{ matrix.env }})
+      - name: Upload all firmware as a single artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cubean-${{ matrix.env }}
+          name: cubean-firmware-${{ github.ref_name }}
           path: Cubean/default/dist/*
-          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cubean-*
+          merge-multiple: true
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
