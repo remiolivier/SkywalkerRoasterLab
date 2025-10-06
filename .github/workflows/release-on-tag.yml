@@ -1,0 +1,70 @@
+name: Release on tag
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Cubean/default
+
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [s3, s3-mini]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.cache/pip
+          key: pio-${{ runner.os }}-${{ hashFiles('Cubean/default/platformio.ini') }}
+          restore-keys: pio-${{ runner.os }}-
+
+      - run: pip install -U platformio
+
+      - name: Build (${{ matrix.env }})
+        run: pio run -e ${{ matrix.env }}
+
+      - name: Collect firmware (${{ matrix.env }})
+        run: |
+          mkdir -p dist
+          for f in ".pio/build/${{ matrix.env }}/firmware.bin" \
+                   ".pio/build/${{ matrix.env }}"/*.uf2 \
+                   ".pio/build/${{ matrix.env }}"/*.hex; do
+            [ -f "$f" ] && cp -v "$f" "dist/cubean-${{ matrix.env }}-$(basename "$f")"
+          done
+
+      - name: Upload all firmware as a single artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cubean-firmware-${{ github.ref_name }}
+          path: Cubean/default/dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cubean-*
+          merge-multiple: true
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
