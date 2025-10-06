@@ -1,0 +1,86 @@
+name: Build (PlatformIO) & Release
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Cubean/default/**'
+    tags: ['v*']
+  pull_request:
+    paths:
+      - 'Cubean/default/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Cubean/default
+
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [s3, s3-mini]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.cache/pip
+          key: pio-${{ runner.os }}-${{ hashFiles('Cubean/platformio.ini') }}
+          restore-keys: pio-${{ runner.os }}-
+
+      - name: Install PlatformIO
+        run: pip install -U platformio
+
+      - name: Build (${{ matrix.env }})
+        run: pio run -e ${{ matrix.env }}
+
+      - name: Collect firmware (${{ matrix.env }})
+        run: |
+          mkdir -p dist
+          for f in ".pio/build/${{ matrix.env }}/firmware.bin" \
+                   ".pio/build/${{ matrix.env }}"/*.uf2 \
+                   ".pio/build/${{ matrix.env }}"/*.hex; do
+            [ -f "$f" ] && cp -v "$f" "dist/cubean-${{ matrix.env }}-$(basename "$f")"
+          done
+          ls -l dist || true
+
+      - name: Upload artifact (${{ matrix.env }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: cubean-${{ matrix.env }}
+          path: Cubean/dist/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all firmware artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cubean-*
+          merge-multiple: true
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
