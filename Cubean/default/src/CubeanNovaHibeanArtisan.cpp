@@ -16,8 +16,8 @@
  * - UART TX_PIN -> Cubean RX: 20
  * - UART RX_PIN <- Cubean TX: 19
  * - UART RX_PIN_PANEL <- Panel TX: 21
- *********************************************************************************************************/ 
-// dummy
+ *********************************************************************************************************/
+
  #include <Arduino.h>
  #include <ArduinoJson.h>
  #include <AsyncTCP.h>
@@ -616,8 +616,10 @@
  bool deviceConnected();
  
  void setRGBColor(CRGB color) {
-   leds[0] = color;
-   FastLED.show();
+  if (color != leds[0]) {
+    leds[0] = color;
+    FastLED.show();
+  }
  }
  
  void handleLED() {
@@ -1435,7 +1437,7 @@
    Serial.printf("Starting Firmware: %s\n", firmWareVersion);
  
    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-   FastLED.setBrightness(255); // Set maximum brightness
+   FastLED.setBrightness(125); // Set half brightness
    setRGBColor(LED_RED);
  
    roaster_uart_init();
