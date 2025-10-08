@@ -129,7 +129,8 @@ static bool g_bleWanted = true;         // desired state (driven by WS presence)
  const char *wifiAPSSID = "Cubean_Roaster";
  const char *wifiAPPass = ""; // No password for AP mode
  Preferences preferences;
- 
+ static bool wifiSleepWas = true;
+
  static bool otaActive = false;
  static unsigned long otaStartTime = 0;
  static const unsigned long OTA_TIMEOUT_MS = 300000; // 5 minutes timeout
@@ -1267,6 +1268,9 @@ static bool g_bleWanted = true;         // desired state (driven by WS presence)
      D_printf("[WS] #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
      g_bleWanted = false;
      applyBleDesiredState();
+     wifiSleepWas = WiFi.getSleep();
+     WiFi.setSleep(false);
+     client->keepAlivePeriod(10);
      return;
    }
  
@@ -1274,6 +1278,7 @@ static bool g_bleWanted = true;         // desired state (driven by WS presence)
      D_printf("[WS] #%u disconnected\n", client->id());
      g_bleWanted = true;
      applyBleDesiredState();
+     WiFi.setSleep(wifiSleepWas);
      return;
    }
  
@@ -1471,7 +1476,7 @@ static bool g_bleWanted = true;         // desired state (driven by WS presence)
    Serial.printf("Starting Firmware: %s\n", firmWareVersion);
  
    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-   FastLED.setBrightness(125); // Set half brightness
+   FastLED.setBrightness(90); // Set half brightness
    setRGBColor(LED_RED);
  
    roaster_uart_init();
@@ -1535,6 +1540,6 @@ static bool g_bleWanted = true;         // desired state (driven by WS presence)
    }
  
    handleLED();
-   delay(20);
+   vTaskDelay(20);
  }
  
