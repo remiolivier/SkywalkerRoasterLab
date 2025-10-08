@@ -96,6 +96,10 @@
  alignas(4) static uint8_t bleQStorage[BLE_Q_LEN * sizeof(BleMsg)];
  static QueueHandle_t bleQueue;
  
+// --- BLE power gating state ---
+static bool g_bleActive = false;        // true after initBLE() succeeds
+static bool g_bleWanted = true;         // desired state (driven by WS presence)
+
  // -----------------------------------------------------------------------------
  // Roaster UART
  // -----------------------------------------------------------------------------
@@ -703,7 +707,7 @@
  
  void notifyClient(const String &message) {
    // BLE notification (only if connected and subscribed)
-   if (deviceConnected()) {
+   if (g_bleActive && deviceConnected()) {
      // Limit to MTU-3 bytes
      size_t maxLen = bleMtu - 3;
      size_t msgLen = min(message.length(), maxLen);
@@ -923,6 +927,8 @@
  };
  
  void initBLE() {
+    if (g_bleActive) return;
+
    NimBLEDevice::init(boardID_BLE.c_str());
    NimBLEDevice::setPower(ESP_PWR_LVL_N0);
    NimBLEDevice::setMTU(bleMtu);
@@ -954,9 +960,33 @@
    adv->setMaxInterval(0x40); // 64 slots = 40ms
    adv->start();
  
+   g_bleActive = true;
    D_println("BLE Advertising started with standard parameters.");
  }
+
+ void deinitBLE() {
+  if (!g_bleActive) return;
+
+  // Stop advertising; deinit cleanly disconnects any peers.
+  NimBLEAdvertising *adv = NimBLEDevice::getAdvertising();
+  if (adv) adv->stop();
+
+  // Clear handles so we never deref after deinit
+  pTxCharacteristic = nullptr;
+  pServer = nullptr;
+
+  // Fully shut down BLE host/controller and free RAM
+  NimBLEDevice::deinit(true);
+
+  g_bleActive = false;
+  D_println("BLE deinitialized.");
+ }
  
+ void applyBleDesiredState() {
+  if (g_bleWanted && !g_bleActive) initBLE();
+  if (!g_bleWanted && g_bleActive) deinitBLE();
+ }
+
  static void processBleQueueBurst() {
    const UBaseType_t MAX_PER_BURST = BLE_Q_LEN;
    constexpr unsigned YIELD_EVERY = 4;
@@ -1235,11 +1265,15 @@
  void webSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
    if (type == WS_EVT_CONNECT) {
      D_printf("[WS] #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+     g_bleWanted = false;
+     applyBleDesiredState();
      return;
    }
  
    if (type == WS_EVT_DISCONNECT) {
      D_printf("[WS] #%u disconnected\n", client->id());
+     g_bleWanted = true;
+     applyBleDesiredState();
      return;
    }
  
@@ -1443,6 +1477,7 @@
    roaster_uart_init();
    panel_uart_init();
  
+   g_bleWanted = true;
    initBLE();
    connectToWifi();
    setupWebServer();
@@ -1495,7 +1530,9 @@
      yield();
    }
  
-   processBleQueueBurst();
+   if (g_bleActive) {
+     processBleQueueBurst();
+   }
  
    handleLED();
    delay(20);
